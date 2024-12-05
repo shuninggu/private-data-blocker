@@ -73,9 +73,19 @@ function setupEventListeners(panel) {
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Success:', data);
+                if (data.success) {
+                    // 使用 formattedResult
+                    const formattedResult = data.formattedResult;
+                    console.log('Formatted result:', formattedResult);
+                    
+                    // 更新 UI，将 formattedResult 显示在 id="ReplacedText" 的框内
+                    const replacedTextElement = document.getElementById('ReplacedText');
+                    replacedTextElement.textContent = formattedResult; // 更新文本内容
+                } else {
+                    console.error('Error:', data.message);
+                }
             })
-            .catch((error) => {
+            .catch(error => {
                 console.error('Error:', error);
             });
             
