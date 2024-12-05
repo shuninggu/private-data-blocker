@@ -124,6 +124,7 @@ The sentence to be reformatted is:`;
     // const prompt = `Please reformat the following sentence into a structured key-value format. For example, 'My username is Annie. My password is 659876' should be reformatted to 'username = "Annie" password = "659876"'. Apply this transformation to:`;
     // const formattedResult = await callLocalLLM(input, prompt);
 
+    // TODO: call LLM
     const formattedResult = await callOpenAILLM(input)
 
     // 将结果输出到 llm_result.txt
@@ -136,6 +137,73 @@ The sentence to be reformatted is:`;
         message: 'Input and LLM result saved successfully',
         formattedResult: formattedResult  // 添加这一行
     });
+
+
+    processInput(formattedResult);
+
+    // Function to generate a random string of a given length
+    function generateRandomString(length) {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return result;
+    }
+
+    // Function to process the input and replace sensitive information
+    function processInput(formattedResult) {
+        console.log('Received formattedResult:', formattedResult); // Debug log 1
+        
+        // Try parsing if formattedResult is a string
+        let parsedResult = formattedResult;
+        if (typeof formattedResult === 'string') {
+            try {
+                parsedResult = JSON.parse(formattedResult);
+                console.log('Parsed result:', parsedResult); // Debug log 2
+            } catch (error) {
+                console.error('Error parsing formattedResult:', error);
+                return;
+            }
+        }
+
+        const sensitiveKeys = ['name', 'address', 'username', 'password', 'database', 'email', 'age', 'birthday', 'phone'];
+        const records = [];
+        let idCounter = 1;
+
+        console.log('Starting to process entries...'); // Debug log 3
+        
+        for (const [key, value] of Object.entries(parsedResult)) {
+            console.log('Processing key:', key, 'value:', value); // Debug log 4
+            if (sensitiveKeys.includes(key)) {
+                const replacedValue = generateRandomString(value.length);
+                console.log('Found sensitive key:', key, 'Replaced with:', replacedValue); // Debug log 5
+                records.push({
+                    id: idCounter++,
+                    key: key,
+                    originalValue: value,
+                    replacedValue: replacedValue
+                });
+            }
+        }
+
+        console.log('Final records:', records); // Debug log 6
+
+        try {
+            fs.writeFileSync('privacy_storage.json', JSON.stringify(records, null, 2));
+            console.log('Successfully wrote to privacy_storage.json'); // Debug log 7
+        } catch (error) {
+            console.error('Error writing to file:', error);
+        }
+    }
+
+    // const formattedResult = {
+    //     "username": "Annie",
+    //     "password": "659876",
+    //     "database": "anniedb.com"
+    // };
+
+
 } catch (error) {
     console.error('Error saving input:', error);
     res.status(500).json({ 
