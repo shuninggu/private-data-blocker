@@ -51,5 +51,23 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
+
+    // Add copy button functionality
+    document.querySelectorAll('.copy-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const targetId = button.getAttribute('data-target');
+            const textToCopy = document.getElementById(targetId).textContent;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                // Optional: Show feedback that text was copied
+                button.style.backgroundColor = '#4CAF50';
+                setTimeout(() => {
+                    button.style.backgroundColor = '';
+                }, 500);
+            }).catch(err => {
+                console.error('Failed to copy text:', err);
+            });
+        });
+    });
 });
 

@@ -18,17 +18,17 @@ function createPanel() {
     `;
     
     panel.innerHTML = `
-        
         <div class="button-container">
             <button id="replaceBtn">Replace Private Data</button>
-            <button id="confirmBtn">Confirm Input</button>
             <button id="restoreBtn">Restore Original Value</button>
-            <div style="background: #f0f0f0; padding: 10px; border-radius: 4px; margin-top: 15px;">
-                Input
+            <div style="background: #f0f0f0; padding: 10px; border-radius: 4px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+                <span>Input</span>
+                <button id="copyInputBtn" style="padding: 2px 8px; font-size: 12px;">Copy</button>
             </div>
             <div id="capturedText" style="margin-top: 5px; padding: 10px; border: 1px solid #ccc;"></div>
-            <div style="background: #f0f0f0; padding: 10px; border-radius: 4px; margin-top: 15px;">
-                Output
+            <div style="background: #f0f0f0; padding: 10px; border-radius: 4px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+                <span>Output</span>
+                <button id="copyOutputBtn" style="padding: 2px 8px; font-size: 12px;">Copy</button>
             </div>
             <div id="ReplacedText" style="margin-top: 5px; padding: 10px; border: 1px solid #ccc;"></div>
         </div>
@@ -36,6 +36,7 @@ function createPanel() {
     
     document.body.appendChild(panel);
     setupEventListeners(panel);
+    setupCopyButtons(panel);
     return panel;
 }
 
@@ -50,7 +51,6 @@ function generateRandomString(length) {
 
 function setupEventListeners(panel) {
     const replaceBtn = panel.querySelector('#replaceBtn');
-    const confirmBtn = panel.querySelector('#confirmBtn');
     const restoreBtn = panel.querySelector('#restoreBtn');
     const capturedText = panel.querySelector('#capturedText');
     const replacedText = panel.querySelector('#ReplacedText');
@@ -74,13 +74,22 @@ function setupEventListeners(panel) {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // 使用 formattedResult
-                    const formattedResult = data.formattedResult;
-                    console.log('Formatted result:', formattedResult);
+                //     使用 formattedResult
+                //     const formattedResult = data.formattedResult;
+                //     console.log('Formatted result:', formattedResult);
                     
-                    // 更新 UI，将 formattedResult 显示在 id="ReplacedText" 的框内
+                //     // 更新 UI，将 formattedResult 显示在 id="ReplacedText" 的框内
+                //     const replacedTextElement = document.getElementById('ReplacedText');
+                //     replacedTextElement.textContent = formattedResult; // 更新文本内容
+
+
+                    // 使用 ReplacedResult
+                    const ReplacedResult = data.ReplacedResult;
+                    console.log('Formatted result:', ReplacedResult);
+                    
+                    // 更新 UI，将 ReplacedResult 显示在 id="ReplacedText" 的框内
                     const replacedTextElement = document.getElementById('ReplacedText');
-                    replacedTextElement.textContent = formattedResult; // 更新文本内容
+                    replacedTextElement.textContent = ReplacedResult; // 更新文本内容
                 } else {
                     console.error('Error:', data.message);
                 }
@@ -91,42 +100,9 @@ function setupEventListeners(panel) {
             
             // 显示原始文本
             capturedText.textContent = currentValue;
-            
-            // 使用正则表达式查找隐私信息
-            const pattern = /(?:username|password)\s*(?:is|=)\s*"([^"]*)"/gi;
-            const matches = Array.from(currentValue.matchAll(pattern));
-            
-            // 格式化结果并存储原始值
-            const result = matches.map(match => ({
-                position: match.index,
-                attribute: match[0].split(/\s*(?:is|=|:)\s*/)[0].toLowerCase(),
-                value: match[1]
-            }));
-            
-            // 保存到本地存储
-            localStorage.setItem('privacyData', JSON.stringify(result));
-            
-            // 创建替换后的版本
-            let replacedContent = currentValue;
-            const replacedResult = result.map(item => {
-                const replacedValue = generateRandomString(item.value.length);
-                replacedContent = replacedContent.replace(item.value, replacedValue);
-                return {
-                    ...item,
-                    originalValue: item.value,
-                    replacedValue: replacedValue
-                };
-            });
-            
-            // 打印替换结果到控制台
-            console.log('Original data:', result);
-            console.log('Replaced data:', replacedResult);
-            
-            // 在 ReplacedText 中显示替换后的文本
-            replacedText.textContent = replacedContent;
-            
-            originalValue = currentValue;
-            activeElement.value = '[PRIVATE_DATA]';
+
+            // originalValue = currentValue;
+            // activeElement.value = '[PRIVATE_DATA]';
         } else {
             capturedText.textContent = 'No input field selected';
             replacedText.textContent = 'No input field selected';
@@ -167,7 +143,7 @@ function setupEventListeners(panel) {
 function makeDraggable(panel) {
     const header = document.createElement('div');
     header.style.cssText = 'padding: 10px; cursor: move; background: #f0f0f0; border-radius: 8px 8px 0 0;';
-    header.textContent = 'Input Manager';
+    header.textContent = 'Private Data Blocker';
     panel.insertBefore(header, panel.firstChild);
 
     let isDragging = false;
@@ -217,3 +193,39 @@ document.addEventListener('focus', function(e) {
 // 初始化：创建面板并使其可拖动
 const panel = createPanel();
 makeDraggable(panel);
+
+// 添加新的复制按钮功能
+function setupCopyButtons(panel) {
+    const copyInputBtn = panel.querySelector('#copyInputBtn');
+    const copyOutputBtn = panel.querySelector('#copyOutputBtn');
+    const capturedText = panel.querySelector('#capturedText');
+    const replacedText = panel.querySelector('#ReplacedText');
+
+    copyInputBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(capturedText.textContent)
+            .then(() => {
+                // 可选：添加复制成功的视觉反馈
+                copyInputBtn.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyInputBtn.textContent = 'Copy';
+                }, 2000);
+            })
+            .catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+    });
+
+    copyOutputBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(replacedText.textContent)
+            .then(() => {
+                // 可选：添加复制成功的视觉反馈
+                copyOutputBtn.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyOutputBtn.textContent = 'Copy';
+                }, 2000);
+            })
+            .catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+    });
+}

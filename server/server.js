@@ -131,14 +131,6 @@ The sentence to be reformatted is:`;
     fs.writeFileSync('llm_result.txt', formattedResult);
     console.log('LLM result saved:', formattedResult);
 
-    // 修改响应，包含 formattedResult
-    res.json({ 
-        success: true, 
-        message: 'Input and LLM result saved successfully',
-        formattedResult: formattedResult  // 添加这一行
-    });
-
-
     processInput(formattedResult);
 
     // Function to generate a random string of a given length
@@ -197,12 +189,15 @@ The sentence to be reformatted is:`;
         }
     }
 
-    // const formattedResult = {
-    //     "username": "Annie",
-    //     "password": "659876",
-    //     "database": "anniedb.com"
-    // };
-
+    // 获取替换后的文本
+    const ReplacedResult = generateReplacedText(input, formattedResult);
+    
+    res.json({ 
+        success: true, 
+        message: 'Input and LLM result saved successfully',
+        formattedResult: formattedResult,
+        ReplacedResult: ReplacedResult
+    });
 
 } catch (error) {
     console.error('Error saving input:', error);
@@ -220,3 +215,52 @@ app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
     console.log(`Saving inputs to ${path.resolve('current_value.txt')}`);
 });
+
+function generateReplacedText(originalText, formattedResult) {
+    try {
+        console.log('Original text:', originalText);
+        console.log('Formatted result:', formattedResult);
+
+        // 读取 privacy_storage.json
+        const privacyData = JSON.parse(fs.readFileSync('privacy_storage.json', 'utf8'));
+        console.log('Privacy data loaded:', privacyData);
+
+        let replacedText = originalText;
+
+        // 解析 formattedResult 如果它是字符串
+        let parsedResult = formattedResult;
+        if (typeof formattedResult === 'string') {
+            try {
+                parsedResult = JSON.parse(formattedResult);
+                console.log('Parsed formatted result:', parsedResult);
+            } catch (error) {
+                console.error('Error parsing formattedResult:', error);
+                return originalText;
+            }
+        }
+
+        // 遍历 privacy_storage.json 中的每条记录
+        privacyData.forEach(record => {
+            const { key, originalValue, replacedValue } = record;
+            console.log(`Processing replacement: ${key} - Original: ${originalValue} - Replace with: ${replacedValue}`);
+            
+            // 创建一个正则表达式来匹配原始值
+            const regex = new RegExp(`\\b${originalValue}\\b`, 'g');
+            
+            // 替换文本中的敏感信息
+            const previousText = replacedText;
+            replacedText = replacedText.replace(regex, replacedValue);
+            
+            if (previousText !== replacedText) {
+                console.log(`Replaced "${originalValue}" with "${replacedValue}"`);
+            }
+        });
+
+        console.log('Final replaced text:', replacedText);
+        return replacedText;
+
+    } catch (error) {
+        console.error('Error generating replaced text:', error);
+        return originalText; // 如果出错，返回原始文本
+    }
+}
