@@ -79,15 +79,42 @@ function createPanel() {
 
             #extension-panel #capturedText,
             #extension-panel #ReplacedText {
-                margin-top: 5px !important;
-                padding: 5px !important;  /* 调整内边距 */
+                margin-top: 3px !important;
+                padding: 4px !important;
                 border: 1px solid #ccc !important;
                 border-radius: 4px !important;
-                min-height: 30px !important;  /* 调整最小高度 */
+                min-height: 25px !important;
+                max-height: 100px !important;  /* 添加最大高度 */
+                overflow-y: auto !important;   /* 添加垂直滚动条 */
                 background: white !important;
                 color: #333 !important;
-                font-size: 20px !important;
-                line-height: 1.4 !important;
+                font-size: 14px !important;
+                line-height: 1.3 !important;
+                word-wrap: break-word !important;  /* 确保长单词会换行 */
+                white-space: pre-wrap !important;  /* 保留换行和空格 */
+            }
+
+            /* 自定义滚动条样式（可选） */
+            #extension-panel #capturedText::-webkit-scrollbar,
+            #extension-panel #ReplacedText::-webkit-scrollbar {
+                width: 8px !important;
+            }
+
+            #extension-panel #capturedText::-webkit-scrollbar-track,
+            #extension-panel #ReplacedText::-webkit-scrollbar-track {
+                background: #f1f1f1 !important;
+                border-radius: 4px !important;
+            }
+
+            #extension-panel #capturedText::-webkit-scrollbar-thumb,
+            #extension-panel #ReplacedText::-webkit-scrollbar-thumb {
+                background: #888 !important;
+                border-radius: 4px !important;
+            }
+
+            #extension-panel #capturedText::-webkit-scrollbar-thumb:hover,
+            #extension-panel #ReplacedText::-webkit-scrollbar-thumb:hover {
+                background: #555 !important;
             }
         </style>
     `;
@@ -190,7 +217,7 @@ function setupEventListeners(panel) {
             // 将选中的文本显示在 input 框中
             capturedText.textContent = selectedText;
             
-            // 发送选中的文本到后端服务器
+            // ���送选中的文本到后端服务器
             fetch('http://localhost:3001/save-selected', {
                 method: 'POST',
                 headers: {

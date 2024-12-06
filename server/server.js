@@ -32,13 +32,38 @@ app.post('/save-input', async (req, res) => {
 
         async function callLocalLLM(input) {
             try {
-                // const prompt = `Please reformat the following sentence into a structured key-value format where any user privacy-related information, such as username, password, address, birthdate, email, and phone, is represented as key-value pairs. 
-                // Note that the numbers may be birthdays, passwords, phone numbers, email addresses, addresses, and other private information.
-                // For example, 'Please help me write the terminal code to connect to the MySQL database remotely. The database name is anniedb.com. User name is Annie and password is 659876. Select the database and select all users in the users table.' 
-                
+                // const prompt = `In the following sentence, please convert all mentions of specific names, places, ages, and numbers into a format that represents the type of information they belong to.
+                // For example, 'Please write a greeting card for Nancy when she is 18.' should be converted to 
+                // ' Please write a greeting card for "name": "Nancy" when she is "age": "18"'`;
+
+//                 const prompt = `Please convert all sensitive information in the following sentence into a key-value format, where both keys and values MUST be enclosed in double quotes (""). This includes:
+// - names (personal, usernames, company names)
+// - places (addresses, cities, locations)
+// - ages and dates
+// - numbers (IDs, phone numbers, account numbers)
+// - any other private information
                 const prompt = `In the following sentence, please convert all mentions of specific names, places, ages, and numbers into a format that represents the type of information they belong to.
-                For example, 'Please write a greeting card for Nancy when she is 18.' should be converted to 
-                ' Please write a greeting card for "name": "Nancy" when she is "age": "18"'`;
+Format requirements:
+1. Always use double quotes for both keys and values: "key": "value"
+2. Keep the rest of the sentence unchanged
+3. Place the key-value pair exactly where the original information appears
+
+youcan select the name of key from the following list:[
+            'name', 'firstname', 'lastname', 'nickname', 'username', 'password', 'email', 'phone', 'mobile', 'age', 'gender', 'birthday', 'birthdate',    // 基本个人信息
+            'place', 'address', 'street', 'city', 'state', 'country', 'zipcode', 'postcode',    // 地址相关
+            'passport', 'license', 'ssn', 'id', 'idcard','insurance',    // 身份证件
+            'account', 'card', 'credit', 'debit', 'bank', 'salary', 'income', 'balance',    // 财务相关
+            'facebook', 'twitter', 'instagram', 'linkedin', 'wechat', 'whatsapp',    // 社交媒体
+            'school', 'company', 'occupation', 'position', 'title', 'department',    // 其他个人信息
+            'health', 'insurance', 'medication', 'diagnosis',    // 医疗健康
+            'spouse', 'family', 'relative', 'parent', 'child',    // 家庭信息
+            'database', 'pin', 'code', 'key', 'token', 'secret'    // 安全相关
+        ];
+Here's an Example:
+Input: 'Please write a greeting card for Nancy when she is 18 years old and lives in Boston.'
+Output: 'Please write a greeting card for "name": "Nancy" when she is "age": "18" years old and lives in "city": "Boston".'
+
+Note: Every piece of sensitive information MUST be converted to "key": "value" format with double quotes.`;
 
                 const response = await fetch('http://localhost:11434/api/generate', {
                     method: 'POST',
@@ -66,15 +91,38 @@ app.post('/save-input', async (req, res) => {
 
         async function callOpenAILLM(input) {
             try {
-                const prompt = `Please reformat the following sentence into a structured key-value format where any user privacy-related information, such as username, password, address, birthdate, email, and phone, is represented as key-value pairs. 
-                For example, 'Please help me write the terminal code to connect to the MySQL database remotely. The database name is anniedb.com. User name is Annie and password is 659876. Select the database and select all users in the users table.' 
-                should be reformatted to '{
-        "username": "Annie",
-        "password": "659876",
-        "database": "anniedb.com"
-        }'
-        -------
-        The sentence to be reformatted is:`;
+        //         const prompt = `Please reformat the following sentence into a structured key-value format where any user privacy-related information, such as username, password, address, birthdate, email, and phone, is represented as key-value pairs. 
+        //         For example, 'Please help me write the terminal code to connect to the MySQL database remotely. The database name is anniedb.com. User name is Annie and password is 659876. Select the database and select all users in the users table.' 
+        //         should be reformatted to '{
+        // "username": "Annie",
+        // "password": "659876",
+        // "database": "anniedb.com"
+        // }'
+        // -------
+        // The sentence to be reformatted is:`;
+
+        const prompt = `In the following sentence, please convert all mentions of specific names, places, ages, and numbers into a format that represents the type of information they belong to.
+Format requirements:
+1. Always use double quotes for both keys and values: "key": "value"
+2. Keep the rest of the sentence unchanged
+3. Place the key-value pair exactly where the original information appears
+
+youcan select the name of key from the following list:[
+            'name', 'firstname', 'lastname', 'nickname', 'username', 'password', 'email', 'phone', 'mobile', 'age', 'gender', 'birthday', 'birthdate',    // 基本个人信息
+            'place', 'address', 'street', 'city', 'state', 'country', 'zipcode', 'postcode',    // 地址相关
+            'passport', 'license', 'ssn', 'id', 'idcard','insurance',    // 身份证件
+            'account', 'card', 'credit', 'debit', 'bank', 'salary', 'income', 'balance',    // 财务相关
+            'facebook', 'twitter', 'instagram', 'linkedin', 'wechat', 'whatsapp',    // 社交媒体
+            'school', 'company', 'occupation', 'position', 'title', 'department',    // 其他个人信息
+            'health', 'insurance', 'medication', 'diagnosis',    // 医疗健康
+            'spouse', 'family', 'relative', 'parent', 'child',    // 家庭信息
+            'database', 'pin', 'code', 'key', 'token', 'secret'    // 安全相关
+        ];
+Here's an Example:
+Input: 'Please write a greeting card for Nancy when she is 18 years old and lives in Boston.'
+Output: 'Please write a greeting card for "name": "Nancy" when she is "age": "18" years old and lives in "city": "Boston".'
+
+Note: Every piece of sensitive information MUST be converted to "key": "value" format with double quotes.`;
         
             // const input = `My username is Annie. My password is 121212`;
                 const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -112,7 +160,10 @@ app.post('/save-input', async (req, res) => {
             }
         }
     // 调用本地大型语言模型
-    const processedResult = await callLocalLLM(input);
+    // const processedResult = await callLocalLLM(input);
+
+    // // TODO: call OpenAI LLM
+    const processedResult = await callOpenAILLM(input)
 
     // TODO:convert to formatted result
     function convertToFormattedResult(processedResult) {
@@ -142,12 +193,13 @@ app.post('/save-input', async (req, res) => {
             return null;
         }
     }
+    fs.writeFileSync('processed_result.txt', processedResult);
 
     // processedResult = 'Please write a greeting card for "name": "billie" when she is "age": "20"';
     const formattedResult = convertToFormattedResult(processedResult);
     console.log(formattedResult);
 
-    // // TODO: call LLM
+    // // TODO: call OpenAI LLM
     // const formattedResult = await callOpenAILLM(input)
 
     // 将结果输出到 llm_result.txt
@@ -182,7 +234,18 @@ app.post('/save-input', async (req, res) => {
             }
         }
 
-        const sensitiveKeys = ['name', 'address', 'username', 'password', 'database', 'email', 'age', 'birthday', 'phone'];
+        // const sensitiveKeys = ['name', 'address', 'username', 'password', 'database', 'email', 'age', 'birthday', 'phone'];
+        const sensitiveKeys = [
+            'name', 'firstname', 'lastname', 'nickname', 'username', 'password', 'email', 'phone', 'mobile', 'age', 'gender', 'birthday', 'birthdate',    // 基本个人信息
+            'place', 'address', 'street', 'city', 'state', 'country', 'zipcode', 'postcode',    // 地址相关
+            'passport', 'license', 'ssn', 'id', 'idcard','insurance',    // 身份证件
+            'account', 'card', 'credit', 'debit', 'bank', 'salary', 'income', 'balance',    // 财务相关
+            'facebook', 'twitter', 'instagram', 'linkedin', 'wechat', 'whatsapp',    // 社交媒体
+            'school', 'company', 'occupation', 'position', 'title', 'department',    // 其他个人信息
+            'health', 'insurance', 'medication', 'diagnosis',    // 医疗健康
+            'spouse', 'family', 'relative', 'parent', 'child',    // 家庭信息
+            'database', 'pin', 'code', 'key', 'token', 'secret'    // 安全相关
+        ];
         const records = [];
         let idCounter = 1;
 
