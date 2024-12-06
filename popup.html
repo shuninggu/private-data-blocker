@@ -1,35 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Private Data Blocker</title>
+  <meta charset="UTF-8">
   <style>
     body {
       width: 300px;
       padding: 15px;
+      font-family: Arial, sans-serif;
     }
-    .button-container {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    .title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #000;
+      letter-spacing: -0.5px;
+      text-align: center;
     }
     button {
+      width: 100%;
       padding: 10px;
-      cursor: pointer;
+      margin: 5px 0;
       border: none;
       border-radius: 4px;
       font-size: 14px;
-      transition: background-color 0.3s;
+      cursor: pointer;
     }
     #replaceBtn {
-      background-color: #4CAF50;
-      color: white;
-    }
-    #confirmBtn {
-      background-color: #2196F3;
+      background-color: #77b55a;
       color: white;
     }
     #restoreBtn {
-      background-color: #f44336;
+      background-color: #4a90e2;
       color: white;
     }
     button:hover {
@@ -81,26 +82,7 @@
   <div class="button-container">
     <button id="replaceBtn">Replace Private Data</button>
     <button id="restoreBtn">Restore Original Value</button>
-    <div class="content-container">
-      <div class="header">Input</div>
-      <div class="text-with-copy">
-        <div id="capturedText" class="text-content"></div>
-        <button class="copy-btn" data-target="capturedText">
-          <img src="copy-icon.png" alt="Copy" width="16" height="16">
-        </button>
-      </div>
-    </div>
-    <div class="content-container">
-      <div class="header">Output</div>
-      <div class="text-with-copy">
-        <div id="ReplacedText" class="text-content"></div>
-        <button class="copy-btn" data-target="ReplacedText">
-          <img src="copy-icon.png" alt="Copy" width="16" height="16">
-        </button>
-      </div>
-    </div>
   </div>
-  <div id="status"></div>
   <script src="popup.js"></script>
 </body>
 </html>

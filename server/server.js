@@ -29,25 +29,17 @@ app.post('/save-input', async (req, res) => {
         fs.writeFileSync('current_value.txt', input);
         
         console.log('Input saved:', input);
-        
-        // 定义调用本地大型语言模型的函数
-        // async function callLocalLLM(input, prompt) {
-        //     // 这里是调用本地大型语言模型的逻辑
-        //     // 返回格式化的结果
-        //     return `username = "Annie" password is "659876"`; // 示例返回值
-        // }
 
         async function callLocalLLM(input) {
             try {
-                const prompt = `Please reformat the following sentence into a structured key-value format where any user privacy-related information, such as username, password, address, birthdate, email, and phone, is represented as key-value pairs. 
-                For example, 'Please help me write the terminal code to connect to the MySQL database remotely. The database name is anniedb.com. User name is Annie and password is 659876. Select the database and select all users in the users table.' 
-                should be reformatted to '{
-"username": "Annie",
-"password": "659876",
-"database": "anniedb.com"
-}'
--------
-The sentence to be reformatted is:`;
+                // const prompt = `Please reformat the following sentence into a structured key-value format where any user privacy-related information, such as username, password, address, birthdate, email, and phone, is represented as key-value pairs. 
+                // Note that the numbers may be birthdays, passwords, phone numbers, email addresses, addresses, and other private information.
+                // For example, 'Please help me write the terminal code to connect to the MySQL database remotely. The database name is anniedb.com. User name is Annie and password is 659876. Select the database and select all users in the users table.' 
+                
+                const prompt = `In the following sentence, please convert all mentions of specific names, places, ages, and numbers into a format that represents the type of information they belong to.
+                For example, 'Please write a greeting card for Nancy when she is 18.' should be converted to 
+                ' Please write a greeting card for "name": "Nancy" when she is "age": "18"'`;
+
                 const response = await fetch('http://localhost:11434/api/generate', {
                     method: 'POST',
                     headers: {
@@ -55,8 +47,7 @@ The sentence to be reformatted is:`;
                     },
                     body: JSON.stringify({
                         model: "llama2",  // 或其他你已安装的模型
-                        // prompt: `what's 1+1`,
-                        prompt: `${prompt}\n${input}\nFormatted Output:`, // test case: My username is Annie. My password is 659876
+                        prompt: `${prompt}\n${input}\n Converted Output:`, // test case: My username is Annie. My password is 659876
                         stream: false
                     })
                 });
@@ -120,12 +111,44 @@ The sentence to be reformatted is:`;
                 throw error;
             }
         }
-    // // 调用本地大型语言模型
-    // const prompt = `Please reformat the following sentence into a structured key-value format. For example, 'My username is Annie. My password is 659876' should be reformatted to 'username = "Annie" password = "659876"'. Apply this transformation to:`;
-    // const formattedResult = await callLocalLLM(input, prompt);
+    // 调用本地大型语言模型
+    const processedResult = await callLocalLLM(input);
 
-    // TODO: call LLM
-    const formattedResult = await callOpenAILLM(input)
+    // TODO:convert to formatted result
+    function convertToFormattedResult(processedResult) {
+        try {
+            // 创建一个对象来存储提取的键值对
+            let formattedObject = {};
+            
+            // 使用正则表达式匹配所有 "key": "value" 模式
+            const regex = /"([^"]+)":\s*"([^"]+)"/g;
+            let match;
+            
+            // 查找所有匹配项
+            while ((match = regex.exec(processedResult)) !== null) {
+                const [_, key, value] = match;
+                formattedObject[key] = value;
+            }
+            
+            // 如果没有找到匹配项，返回null
+            if (Object.keys(formattedObject).length === 0) {
+                return null;
+            }
+            
+            // 将对象转换为JSON字符串
+            return JSON.stringify(formattedObject, null, 2);
+        } catch (error) {
+            console.error('Error converting to formatted result:', error);
+            return null;
+        }
+    }
+
+    // processedResult = 'Please write a greeting card for "name": "billie" when she is "age": "20"';
+    const formattedResult = convertToFormattedResult(processedResult);
+    console.log(formattedResult);
+
+    // // TODO: call LLM
+    // const formattedResult = await callOpenAILLM(input)
 
     // 将结果输出到 llm_result.txt
     fs.writeFileSync('llm_result.txt', formattedResult);
@@ -208,7 +231,71 @@ The sentence to be reformatted is:`;
     });
 }
 });
+
+//get replaced text
+// 添加新的路由处理选中文本
+app.post('/save-selected', async (req, res) => {
+    const { selectedText, timestamp } = req.body;
+    
+    try {
+        // 将选中的文本保存到文件
+        fs.appendFileSync('selected_text.txt', 
+            `\n[${timestamp}] Selected Text: ${selectedText}`
+        );
         
+        console.log('Received selected text:', selectedText);
+        
+        // 还原隐私信息
+        const restoredText = restorePrivacyInfo(selectedText);
+        
+        res.json({ 
+            success: true, 
+            message: 'Selected text processed successfully',
+            restoredText: restoredText
+        });
+    } catch (error) {
+        console.error('Error processing selected text:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: 'Error processing selected text',
+            error: error.message
+        });
+    }
+});
+
+function restorePrivacyInfo(selectedText) {
+    try {
+        console.log('Processing selected text:', selectedText);
+        
+        // 读取 privacy_storage.json
+        const privacyData = JSON.parse(fs.readFileSync('privacy_storage.json', 'utf8'));
+        console.log('Loaded privacy data:', privacyData);
+        
+        let restoredText = selectedText;
+
+        // 遍历 privacy_storage.json 中的每条记录
+        privacyData.forEach(record => {
+            const { key, originalValue, replacedValue } = record;
+            console.log(`Checking for replaced value: ${replacedValue}`);
+            
+            // 创建正则表达式来匹配替换后的值
+            const regex = new RegExp(`\\b${replacedValue}\\b`, 'g');
+            
+            // 如果找到替换值，还原为原始值
+            if (restoredText.match(regex)) {
+                console.log(`Found match: ${replacedValue} -> ${originalValue}`);
+                restoredText = restoredText.replace(regex, originalValue);
+            }
+        });
+
+        console.log('Restored text:', restoredText);
+        return restoredText;
+
+    } catch (error) {
+        console.error('Error restoring privacy info:', error);
+        return selectedText; // 如果出错，返回原始选中文本
+    }
+}
 
 // 启动服务器
 app.listen(PORT, () => {

@@ -1,36 +1,112 @@
 let activeElement = null;
 let originalValue = null;
+let selectedText = '';
 
 // 创建并注入面板
 function createPanel() {
     const panel = document.createElement('div');
     panel.id = 'extension-panel';
-    panel.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        width: 300px;
-        background: white;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        border-radius: 8px;
-        z-index: 9999;
-        padding: 15px;
+    
+    const styles = `
+        <style>
+            #extension-panel * {
+                font-family: Arial, sans-serif !important;  /* 为所有子元素设置字体 */
+            }
+
+            #extension-panel {
+                position: fixed !important;
+                top: 20px !important;
+                right: 20px !important;
+                width: 300px !important;
+                background: white !important;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2) !important;
+                border-radius: 8px !important;
+                z-index: 9999 !important;
+                padding: 15px !important;
+            }
+
+            #extension-panel .title {
+                font-size: 20px !important;
+                font-weight: bold !important;
+                margin-bottom: 15px !important;
+                color: #000 !important;
+                letter-spacing: -0.5px !important;  /* 调整字间距 */
+                text-align: center !important;  /* 添加居中对齐 */
+            }
+
+            #extension-panel button {
+                width: 100% !important;
+                padding: 10px !important;
+                margin: 5px 0 !important;
+                border: none !important;
+                border-radius: 4px !important;
+                font-size: 20px !important;
+                cursor: pointer !important;
+            }
+
+            #extension-panel #replaceBtn {
+                background-color: #77b55a !important;
+                color: white !important;
+            }
+
+            #extension-panel #restoreBtn {
+                background-color: #4a90e2 !important;
+                color: white !important;
+            }
+
+            #extension-panel .section-header {
+                background: #f0f0f0 !important;
+                padding: 10px !important;
+                border-radius: 4px !important;
+                margin-top: 15px !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                font-size: 20px !important;
+            }
+
+            #extension-panel .copy-btn {
+                padding: 2px 8px !important;
+                font-size: 20px !important;
+                background: white !important;
+                border: 1px solid #ccc !important;
+                border-radius: 3px !important;
+                color: #333 !important;
+                width: auto !important;
+                min-width: 45px !important;
+                margin: 0 !important;
+            }
+
+            #extension-panel #capturedText,
+            #extension-panel #ReplacedText {
+                margin-top: 5px !important;
+                padding: 5px !important;  /* 调整内边距 */
+                border: 1px solid #ccc !important;
+                border-radius: 4px !important;
+                min-height: 30px !important;  /* 调整最小高度 */
+                background: white !important;
+                color: #333 !important;
+                font-size: 20px !important;
+                line-height: 1.4 !important;
+            }
+        </style>
     `;
     
-    panel.innerHTML = `
+    panel.innerHTML = styles + `
+        <div class="title">Private Data Blocker</div>
         <div class="button-container">
             <button id="replaceBtn">Replace Private Data</button>
             <button id="restoreBtn">Restore Original Value</button>
-            <div style="background: #f0f0f0; padding: 10px; border-radius: 4px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <div class="section-header">
                 <span>Input</span>
-                <button id="copyInputBtn" style="padding: 2px 8px; font-size: 12px;">Copy</button>
+                <button id="copyInputBtn" class="copy-btn">Copy</button>
             </div>
-            <div id="capturedText" style="margin-top: 5px; padding: 10px; border: 1px solid #ccc;"></div>
-            <div style="background: #f0f0f0; padding: 10px; border-radius: 4px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center;">
+            <div id="capturedText"></div>
+            <div class="section-header">
                 <span>Output</span>
-                <button id="copyOutputBtn" style="padding: 2px 8px; font-size: 12px;">Copy</button>
+                <button id="copyOutputBtn" class="copy-btn">Copy</button>
             </div>
-            <div id="ReplacedText" style="margin-top: 5px; padding: 10px; border: 1px solid #ccc;"></div>
+            <div id="ReplacedText"></div>
         </div>
     `;
     
@@ -78,7 +154,7 @@ function setupEventListeners(panel) {
                 //     const formattedResult = data.formattedResult;
                 //     console.log('Formatted result:', formattedResult);
                     
-                //     // 更新 UI，将 formattedResult 显示在 id="ReplacedText" 的框内
+                //     // 更新 UI，将 formattedResult 显在 id="ReplacedText" 的框内
                 //     const replacedTextElement = document.getElementById('ReplacedText');
                 //     replacedTextElement.textContent = formattedResult; // 更新文本内容
 
@@ -110,40 +186,50 @@ function setupEventListeners(panel) {
     });
 
     restoreBtn.addEventListener('click', () => {
-        if (activeElement) {
-            const currentValue = activeElement.value;
-            console.log('Current input value:', currentValue);
+        if (selectedText) {
+            // 将选中的文本显示在 input 框中
+            capturedText.textContent = selectedText;
             
-            // 显示当前输入框的文本
-            capturedText.textContent = currentValue;
-            
-            // 从本地存储中获取替换数据
-            const storedData = JSON.parse(localStorage.getItem('privacyData'));
-            console.log('Stored data:', storedData); // 调试用
-            
-            // 创建替换后的版本
-            let restoredContent = replacedText.textContent; // 使用当前 replacedText 的内容
-            
-            // 遍历存储的数据，将 replacedValue 替换回 originalValue
-            storedData.forEach(item => {
-                const pattern = new RegExp(`"${item.replacedValue}"`, 'g');
-                restoredContent = restoredContent.replace(pattern, `"${item.value}"`);
+            // 发送选中的文本到后端服务器
+            fetch('http://localhost:3001/save-selected', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    selectedText: selectedText,
+                    timestamp: new Date().toISOString()
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Selected text processed successfully');
+                    // 在 ReplacedText 框中显示还原后的文本
+                    replacedText.textContent = data.restoredText;
+                } else {
+                    console.error('Error:', data.message);
+                    replacedText.textContent = 'Error processing text';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                replacedText.textContent = 'Error connecting to server';
             });
             
-            // 在 ReplacedText 中显示恢复后的文本
-            replacedText.textContent = restoredContent;
-            
+            // 可选：清空选中的文本
+            selectedText = '';
         } else {
-            capturedText.textContent = 'No input field selected';
-            replacedText.textContent = 'No input field selected';
+            capturedText.textContent = 'No text selected';
+            replacedText.textContent = 'No text selected';
         }
     });
 }
 
 function makeDraggable(panel) {
     const header = document.createElement('div');
-    header.style.cssText = 'padding: 10px; cursor: move; background: #f0f0f0; border-radius: 8px 8px 0 0;';
-    header.textContent = 'Private Data Blocker';
+    header.style.cssText = 'padding: 10px; cursor: move; background: white; border-radius: 8px 8px 0 0;';
+    // header.textContent = 'Private Data Blocker';
     panel.insertBefore(header, panel.firstChild);
 
     let isDragging = false;
@@ -180,7 +266,7 @@ function makeDraggable(panel) {
     }
 }
 
-// 听输入框的焦点
+// 听输入的焦点
 document.addEventListener('focus', function(e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
         activeElement = e.target;
@@ -190,7 +276,7 @@ document.addEventListener('focus', function(e) {
     }
 }, true);
 
-// 初始化：创建面板并使其可拖动
+// 初始化：创建面板并其可拖动
 const panel = createPanel();
 makeDraggable(panel);
 
@@ -229,3 +315,9 @@ function setupCopyButtons(panel) {
             });
     });
 }
+
+// 添加文本选择事件监听器
+document.addEventListener('mouseup', function() {
+    const selection = window.getSelection();
+    selectedText = selection.toString().trim();
+});
