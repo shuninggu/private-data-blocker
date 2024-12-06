@@ -2,7 +2,7 @@ let activeElement = null;
 let originalValue = null;
 let selectedText = '';
 
-// 创建并注入面板
+// Create and inject panel
 function createPanel() {
     const panel = document.createElement('div');
     panel.id = 'extension-panel';
@@ -10,7 +10,7 @@ function createPanel() {
     const styles = `
         <style>
             #extension-panel * {
-                font-family: Arial, sans-serif !important;  /* 为所有子元素设置字体 */
+                font-family: Arial, sans-serif !important;  /* Set font for all child elements */
             }
 
             #extension-panel {
@@ -30,8 +30,8 @@ function createPanel() {
                 font-weight: bold !important;
                 margin-bottom: 15px !important;
                 color: #000 !important;
-                letter-spacing: -0.5px !important;  /* 调整字间距 */
-                text-align: center !important;  /* 添加居中对齐 */
+                letter-spacing: -0.5px !important;  /* Adjust letter spacing */
+                text-align: center !important;  /* Add center alignment */
             }
 
             #extension-panel button {
@@ -84,17 +84,17 @@ function createPanel() {
                 border: 1px solid #ccc !important;
                 border-radius: 4px !important;
                 min-height: 25px !important;
-                max-height: 100px !important;  /* 添加最大高度 */
-                overflow-y: auto !important;   /* 添加垂直滚动条 */
+                max-height: 100px !important;  /* Add maximum height */
+                overflow-y: auto !important;   /* Add vertical scrollbar */
                 background: white !important;
                 color: #333 !important;
                 font-size: 14px !important;
                 line-height: 1.3 !important;
-                word-wrap: break-word !important;  /* 确保长单词会换行 */
-                white-space: pre-wrap !important;  /* 保留换行和空格 */
+                word-wrap: break-word !important;  /* Ensure long words will wrap */
+                white-space: pre-wrap !important;  /* Preserve line breaks and spaces */
             }
 
-            /* 自定义滚动条样式（可选） */
+            /* Custom scrollbar style (optional) */
             #extension-panel #capturedText::-webkit-scrollbar,
             #extension-panel #ReplacedText::-webkit-scrollbar {
                 width: 8px !important;
@@ -163,7 +163,7 @@ function setupEventListeners(panel) {
             const currentValue = activeElement.value;
             console.log('Current input value:', currentValue);
             
-            // 发送数据到本地服务器
+            // Send data to local server
             fetch('http://localhost:3001/save-input', {
                 method: 'POST',
                 headers: {
@@ -217,7 +217,7 @@ function setupEventListeners(panel) {
             // 将选中的文本显示在 input 框中
             capturedText.textContent = selectedText;
             
-            // ���送选中的文本到后端服务器
+            // 送选中的文本到后端服务器
             fetch('http://localhost:3001/save-selected', {
                 method: 'POST',
                 headers: {
@@ -293,7 +293,7 @@ function makeDraggable(panel) {
     }
 }
 
-// 听输入的焦点
+// Listen for input focus
 document.addEventListener('focus', function(e) {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
         activeElement = e.target;
@@ -303,11 +303,11 @@ document.addEventListener('focus', function(e) {
     }
 }, true);
 
-// 初始化：创建面板并其可拖动
+// Initialize: create panel and make it draggable
 const panel = createPanel();
 makeDraggable(panel);
 
-// 添加新的复制按钮功能
+// Add new copy button functionality
 function setupCopyButtons(panel) {
     const copyInputBtn = panel.querySelector('#copyInputBtn');
     const copyOutputBtn = panel.querySelector('#copyOutputBtn');
@@ -317,7 +317,7 @@ function setupCopyButtons(panel) {
     copyInputBtn.addEventListener('click', () => {
         navigator.clipboard.writeText(capturedText.textContent)
             .then(() => {
-                // 可选：添加复制成功的视觉反馈
+                // Optional: Add visual feedback for successful copy
                 copyInputBtn.textContent = 'Copied!';
                 setTimeout(() => {
                     copyInputBtn.textContent = 'Copy';
@@ -331,7 +331,7 @@ function setupCopyButtons(panel) {
     copyOutputBtn.addEventListener('click', () => {
         navigator.clipboard.writeText(replacedText.textContent)
             .then(() => {
-                // 可选：添加复制成功的视觉反馈
+                // Optional: Add visual feedback for successful copy
                 copyOutputBtn.textContent = 'Copied!';
                 setTimeout(() => {
                     copyOutputBtn.textContent = 'Copy';
@@ -343,7 +343,7 @@ function setupCopyButtons(panel) {
     });
 }
 
-// 添加文本选择事件监听器
+// Add text selection event listener
 document.addEventListener('mouseup', function() {
     const selection = window.getSelection();
     selectedText = selection.toString().trim();

@@ -17,7 +17,7 @@ dotenv.config();
 const app = express();
 const PORT = 3001;
 
-// 中间件
+// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -25,7 +25,7 @@ app.post('/save-input', async (req, res) => {
     const { input } = req.body;
     
     try {
-        // 只保存 input 内容到 current_value.txt
+        // Save only input content to current_value.txt
         fs.writeFileSync('current_value.txt', input);
         
         console.log('Input saved:', input);
@@ -49,15 +49,15 @@ Format requirements:
 3. Place the key-value pair exactly where the original information appears
 
 youcan select the name of key from the following list:[
-            'name', 'firstname', 'lastname', 'nickname', 'username', 'password', 'email', 'phone', 'mobile', 'age', 'gender', 'birthday', 'birthdate',    // 基本个人信息
-            'place', 'address', 'street', 'city', 'state', 'country', 'zipcode', 'postcode',    // 地址相关
-            'passport', 'license', 'ssn', 'id', 'idcard','insurance',    // 身份证件
-            'account', 'card', 'credit', 'debit', 'bank', 'salary', 'income', 'balance',    // 财务相关
-            'facebook', 'twitter', 'instagram', 'linkedin', 'wechat', 'whatsapp',    // 社交媒体
-            'school', 'company', 'occupation', 'position', 'title', 'department',    // 其他个人信息
-            'health', 'insurance', 'medication', 'diagnosis',    // 医疗健康
-            'spouse', 'family', 'relative', 'parent', 'child',    // 家庭信息
-            'database', 'pin', 'code', 'key', 'token', 'secret'    // 安全相关
+            'name', 'firstname', 'lastname', 'nickname', 'username', 'password', 'email', 'phone', 'mobile', 'age', 'gender', 'birthday', 'birthdate',    // Basic personal information
+            'place', 'address', 'street', 'city', 'state', 'country', 'zipcode', 'postcode',    // Address related
+            'passport', 'license', 'ssn', 'id', 'idcard','insurance',    // Identity documents
+            'account', 'card', 'credit', 'debit', 'bank', 'salary', 'income', 'balance',    // Financial information
+            'facebook', 'twitter', 'instagram', 'linkedin', 'wechat', 'whatsapp',    // Social media
+            'school', 'company', 'occupation', 'position', 'title', 'department',    // Other personal information
+            'health', 'insurance', 'medication', 'diagnosis',    // Medical and health
+            'spouse', 'family', 'relative', 'parent', 'child',    // Family information
+            'database', 'pin', 'code', 'key', 'token', 'secret'    // Security related
         ];
 Here's an Example:
 Input: 'Please write a greeting card for Nancy when she is 18 years old and lives in Boston.'
@@ -108,15 +108,15 @@ Format requirements:
 3. Place the key-value pair exactly where the original information appears
 
 youcan select the name of key from the following list:[
-            'name', 'firstname', 'lastname', 'nickname', 'username', 'password', 'email', 'phone', 'mobile', 'age', 'gender', 'birthday', 'birthdate',    // 基本个人信息
-            'place', 'address', 'street', 'city', 'state', 'country', 'zipcode', 'postcode',    // 地址相关
-            'passport', 'license', 'ssn', 'id', 'idcard','insurance',    // 身份证件
-            'account', 'card', 'credit', 'debit', 'bank', 'salary', 'income', 'balance',    // 财务相关
-            'facebook', 'twitter', 'instagram', 'linkedin', 'wechat', 'whatsapp',    // 社交媒体
-            'school', 'company', 'occupation', 'position', 'title', 'department',    // 其他个人信息
-            'health', 'insurance', 'medication', 'diagnosis',    // 医疗健康
-            'spouse', 'family', 'relative', 'parent', 'child',    // 家庭信息
-            'database', 'pin', 'code', 'key', 'token', 'secret'    // 安全相关
+            'name', 'firstname', 'lastname', 'nickname', 'username', 'password', 'email', 'phone', 'mobile', 'age', 'gender', 'birthday', 'birthdate',    // Basic personal information
+            'place', 'address', 'street', 'city', 'state', 'country', 'zipcode', 'postcode',    // Address related
+            'passport', 'license', 'ssn', 'id', 'idcard','insurance',    // Identity documents
+            'account', 'card', 'credit', 'debit', 'bank', 'salary', 'income', 'balance',    // Financial information
+            'facebook', 'twitter', 'instagram', 'linkedin', 'wechat', 'whatsapp',    // Social media
+            'school', 'company', 'occupation', 'position', 'title', 'department',    // Other personal information
+            'health', 'insurance', 'medication', 'diagnosis',    // Medical and health
+            'spouse', 'family', 'relative', 'parent', 'child',    // Family information
+            'database', 'pin', 'code', 'key', 'token', 'secret'    // Security related
         ];
 Here's an Example:
 Input: 'Please write a greeting card for Nancy when she is 18 years old and lives in Boston.'
@@ -159,34 +159,34 @@ Note: Every piece of sensitive information MUST be converted to "key": "value" f
                 throw error;
             }
         }
-    // 调用本地大型语言模型
+    // Call local LLM
     // const processedResult = await callLocalLLM(input);
 
-    // // TODO: call OpenAI LLM
+    // TODO: call OpenAI LLM
     const processedResult = await callOpenAILLM(input)
 
-    // TODO:convert to formatted result
+    // TODO: convert to formatted result
     function convertToFormattedResult(processedResult) {
         try {
-            // 创建一个对象来存储提取的键值对
+            // Create an object to store the extracted key-value pairs
             let formattedObject = {};
             
-            // 使用正则表达式匹配所有 "key": "value" 模式
+            // Use regular expression to match all "key": "value" patterns
             const regex = /"([^"]+)":\s*"([^"]+)"/g;
             let match;
             
-            // 查找所有匹配项
+            // Find all matches
             while ((match = regex.exec(processedResult)) !== null) {
                 const [_, key, value] = match;
                 formattedObject[key] = value;
             }
             
-            // 如果没有找到匹配项，返回null
+            // If no matches are found, return null
             if (Object.keys(formattedObject).length === 0) {
                 return null;
             }
             
-            // 将对象转换为JSON字符串
+            // Convert the object to a JSON string
             return JSON.stringify(formattedObject, null, 2);
         } catch (error) {
             console.error('Error converting to formatted result:', error);
@@ -199,10 +199,10 @@ Note: Every piece of sensitive information MUST be converted to "key": "value" f
     const formattedResult = convertToFormattedResult(processedResult);
     console.log(formattedResult);
 
-    // // TODO: call OpenAI LLM
+    // TODO: call OpenAI LLM
     // const formattedResult = await callOpenAILLM(input)
 
-    // 将结果输出到 llm_result.txt
+    // Save the result to llm_result.txt
     fs.writeFileSync('llm_result.txt', formattedResult);
     console.log('LLM result saved:', formattedResult);
 
@@ -236,15 +236,15 @@ Note: Every piece of sensitive information MUST be converted to "key": "value" f
 
         // const sensitiveKeys = ['name', 'address', 'username', 'password', 'database', 'email', 'age', 'birthday', 'phone'];
         const sensitiveKeys = [
-            'name', 'firstname', 'lastname', 'nickname', 'username', 'password', 'email', 'phone', 'mobile', 'age', 'gender', 'birthday', 'birthdate',    // 基本个人信息
-            'place', 'address', 'street', 'city', 'state', 'country', 'zipcode', 'postcode',    // 地址相关
-            'passport', 'license', 'ssn', 'id', 'idcard','insurance',    // 身份证件
-            'account', 'card', 'credit', 'debit', 'bank', 'salary', 'income', 'balance',    // 财务相关
-            'facebook', 'twitter', 'instagram', 'linkedin', 'wechat', 'whatsapp',    // 社交媒体
-            'school', 'company', 'occupation', 'position', 'title', 'department',    // 其他个人信息
-            'health', 'insurance', 'medication', 'diagnosis',    // 医疗健康
-            'spouse', 'family', 'relative', 'parent', 'child',    // 家庭信息
-            'database', 'pin', 'code', 'key', 'token', 'secret'    // 安全相关
+            'name', 'firstname', 'lastname', 'nickname', 'username', 'password', 'email', 'phone', 'mobile', 'age', 'gender', 'birthday', 'birthdate',    // Basic personal information
+            'place', 'address', 'street', 'city', 'state', 'country', 'zipcode', 'postcode',    // Address related
+            'passport', 'license', 'ssn', 'id', 'idcard','insurance',    // Identity documents
+            'account', 'card', 'credit', 'debit', 'bank', 'salary', 'income', 'balance',    // Financial information
+            'facebook', 'twitter', 'instagram', 'linkedin', 'wechat', 'whatsapp',    // Social media
+            'school', 'company', 'occupation', 'position', 'title', 'department',    // Other personal information
+            'health', 'insurance', 'medication', 'diagnosis',    // Medical and health
+            'spouse', 'family', 'relative', 'parent', 'child',    // Family information
+            'database', 'pin', 'code', 'key', 'token', 'secret'    // Security related
         ];
         const records = [];
         let idCounter = 1;
@@ -275,7 +275,7 @@ Note: Every piece of sensitive information MUST be converted to "key": "value" f
         }
     }
 
-    // 获取替换后的文本
+    // Get the replaced text
     const ReplacedResult = generateReplacedText(input, formattedResult);
     
     res.json({ 
@@ -296,19 +296,19 @@ Note: Every piece of sensitive information MUST be converted to "key": "value" f
 });
 
 //get replaced text
-// 添加新的路由处理选中文本
+// Add a new route to handle selected text
 app.post('/save-selected', async (req, res) => {
     const { selectedText, timestamp } = req.body;
     
     try {
-        // 将选中的文本保存到文件
+        // Save the selected text to a file
         fs.appendFileSync('selected_text.txt', 
             `\n[${timestamp}] Selected Text: ${selectedText}`
         );
         
         console.log('Received selected text:', selectedText);
         
-        // 还原隐私信息
+        // Restore privacy information
         const restoredText = restorePrivacyInfo(selectedText);
         
         res.json({ 
@@ -330,21 +330,21 @@ function restorePrivacyInfo(selectedText) {
     try {
         console.log('Processing selected text:', selectedText);
         
-        // 读取 privacy_storage.json
+        // Read privacy_storage.json
         const privacyData = JSON.parse(fs.readFileSync('privacy_storage.json', 'utf8'));
         console.log('Loaded privacy data:', privacyData);
         
         let restoredText = selectedText;
 
-        // 遍历 privacy_storage.json 中的每条记录
+        // Iterate through each record in privacy_storage.json
         privacyData.forEach(record => {
             const { key, originalValue, replacedValue } = record;
             console.log(`Checking for replaced value: ${replacedValue}`);
             
-            // 创建正则表达式来匹配替换后的值
+            // Create a regular expression to match the replaced value
             const regex = new RegExp(`\\b${replacedValue}\\b`, 'g');
             
-            // 如果找到替换值，还原为原始值
+            // If the replaced value is found, restore it to the original value
             if (restoredText.match(regex)) {
                 console.log(`Found match: ${replacedValue} -> ${originalValue}`);
                 restoredText = restoredText.replace(regex, originalValue);
@@ -356,11 +356,11 @@ function restorePrivacyInfo(selectedText) {
 
     } catch (error) {
         console.error('Error restoring privacy info:', error);
-        return selectedText; // 如果出错，返回原始选中文本
+        return selectedText; // If an error occurs, return the original selected text
     }
 }
 
-// 启动服务器
+// Start the server
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
     console.log(`Saving inputs to ${path.resolve('current_value.txt')}`);
@@ -371,13 +371,13 @@ function generateReplacedText(originalText, formattedResult) {
         console.log('Original text:', originalText);
         console.log('Formatted result:', formattedResult);
 
-        // 读取 privacy_storage.json
+        // Read privacy_storage.json
         const privacyData = JSON.parse(fs.readFileSync('privacy_storage.json', 'utf8'));
         console.log('Privacy data loaded:', privacyData);
 
         let replacedText = originalText;
 
-        // 解析 formattedResult 如果它是字符串
+        // Parse formattedResult if it's a string
         let parsedResult = formattedResult;
         if (typeof formattedResult === 'string') {
             try {
@@ -389,15 +389,15 @@ function generateReplacedText(originalText, formattedResult) {
             }
         }
 
-        // 遍历 privacy_storage.json 中的每条记录
+        // Iterate through each record in privacy_storage.json
         privacyData.forEach(record => {
             const { key, originalValue, replacedValue } = record;
             console.log(`Processing replacement: ${key} - Original: ${originalValue} - Replace with: ${replacedValue}`);
             
-            // 创建一个正则表达式来匹配原始值
+            // Create a regular expression to match the original value
             const regex = new RegExp(`\\b${originalValue}\\b`, 'g');
             
-            // 替换文本中的敏感信息
+            // Replace sensitive information in the text
             const previousText = replacedText;
             replacedText = replacedText.replace(regex, replacedValue);
             
@@ -411,6 +411,6 @@ function generateReplacedText(originalText, formattedResult) {
 
     } catch (error) {
         console.error('Error generating replaced text:', error);
-        return originalText; // 如果出错，返回原始文本
+        return originalText; // If an error occurs, return the original text
     }
 }
