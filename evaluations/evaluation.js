@@ -11,13 +11,18 @@ async function processSourceTexts() {
     const sourceTexts = await loadSourceTexts();
     
     const formattedResults = [];
-  
+    
+    console.log("STARTING PROCESSING texts")
     for (let i = 0; i < sourceTexts.length; i++) {
       const input = sourceTexts[i];
   
       // Call the Local LLM for each source_text
       console.log(input)
+      const promptStart = performance.now();
       const processedResult = await callLocalLLM(input);
+      const promptEnd = performance.now();
+      const promptDiff = (promptStart - promptEnd) / 1000;
+      console.log(`Prompt ${i} processed in TIME =  ${promptDiff.toFixed(2)} seconds`)
       console.log("--OUTPUT IS --")
       console.log(processedResult)
     //   console.log("--------------------------------------------------")
@@ -27,6 +32,9 @@ async function processSourceTexts() {
       // Push the formatted result to the array
       formattedResults.push(formattedResult);
     }
+    const processTextsEnd = performance.now();
+    const processDiff = (processTextsEnd - processTextsStart) / 1000;
+    console.log(`All Texts processing time ${processDiff.toFixed(2)} seconds`)
   
     // Save the results to 'generated_outputs.json'
     fs.writeFileSync('generated_outputs.json', JSON.stringify(formattedResults, null, 2));
