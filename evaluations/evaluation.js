@@ -11,7 +11,7 @@ async function processSourceTexts() {
     const sourceTexts = await loadSourceTexts();
     
     const formattedResults = [];
-    
+    const processTextsStart = performance.now();
     console.log("STARTING PROCESSING texts")
     for (let i = 0; i < sourceTexts.length; i++) {
       const input = sourceTexts[i];
