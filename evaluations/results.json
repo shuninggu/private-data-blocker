@@ -1,0 +1,27 @@
+[
+    {
+        "accuracy": 32.587859424920126,
+        "number_of_samples": 100,
+        "model_name": "llama3.2:3B"
+    },
+    {
+        "accuracy": 32.86219081272085,
+        "number_of_samples": 100,
+        "model_name": "llama3.2:3B"
+    },
+    {
+        "accuracy": 54.632587859424916,
+        "number_of_samples": 100,
+        "model_name": "Isotonic/deberta-v3-base_finetuned_ai4privacy_v2"
+    },
+    {
+        "accuracy": 49.774173074936165,
+        "number_of_samples": 100,
+        "model_name": "Isotonic/deberta-v3-base_finetuned_ai4privacy_v2"
+    },
+    {
+        "accuracy": 49.774173074936165,
+        "number_of_samples": 43501,
+        "model_name": "Isotonic/deberta-v3-base_finetuned_ai4privacy_v2"
+    }
+]

@@ -1,45 +1,102 @@
 import fs from 'fs'; 
 
 // Fetch the source texts from the saved JSON file
+// async function loadSourceTexts() {
+//     const data = fs.readFileSync('source_texts.json', 'utf-8'); // Read the file synchronously
+//     const sourceTexts = JSON.parse(data); // Parse the JSON data
+//     return sourceTexts;
+//   }
+
+// async function processSourceTexts() {
+//     const sourceTexts = await loadSourceTexts();
+    
+//     const formattedResults = [];
+//     const processTextsStart = performance.now();
+//     console.log("STARTING PROCESSING texts")
+//     for (let i = 0; i < sourceTexts.length; i++) {
+//       const input = sourceTexts[i];
+  
+//       // Call the Local LLM for each source_text
+//       console.log(input)
+//       const promptStart = performance.now();
+//       const processedResult = await callLocalLLM(input);
+//       const promptEnd = performance.now();
+//       const promptDiff = (promptStart - promptEnd) / 1000;
+//       console.log(`Prompt ${i} processed in TIME =  ${promptDiff.toFixed(2)} seconds`)
+//       console.log("--OUTPUT IS --")
+//       console.log(processedResult)
+//     //   console.log("--------------------------------------------------")
+//       // Convert to the desired formatted result
+//       const formattedResult = convertToFormattedResult(processedResult);
+  
+//       // Push the formatted result to the array
+//       formattedResults.push(formattedResult);
+//     }
+//     const processTextsEnd = performance.now();
+//     const processDiff = (processTextsEnd - processTextsStart) / 1000;
+//     console.log(`All Texts processing time ${processDiff.toFixed(2)} seconds`)
+  
+//     // Save the results to 'generated_outputs.json'
+//     fs.writeFileSync('generated_outputs.json', JSON.stringify(formattedResults, null, 2));
+//     console.log('generated_outputs.json saved successfully.');
+//   }
+
+
+// const { performance } = require('perf_hooks');
+
 async function loadSourceTexts() {
-    const data = fs.readFileSync('source_texts.json', 'utf-8'); // Read the file synchronously
-    const sourceTexts = JSON.parse(data); // Parse the JSON data
-    return sourceTexts;
+  const data = fs.readFileSync('source_texts.json', 'utf-8'); // Read the file synchronously
+  return JSON.parse(data); // Parse the JSON data
+}
+
+async function processBatch(batch, startIndex) {
+  const formattedResults = [];
+  for (let i = 0; i < batch.length; i++) {
+    const input = batch[i];
+    // console.log(`Processing text at index ${startIndex + i}:`, input);
+
+    // const promptStart = performance.now();
+    const processedResult = await callLocalLLM(input);
+    // const promptEnd = performance.now();
+    // const promptDiff = (promptEnd - promptStart) / 1000;
+    // console.log(`Prompt ${startIndex + i} processed in ${promptDiff.toFixed(2)} seconds`);
+
+    const formattedResult = convertToFormattedResult(processedResult);
+    formattedResults.push(formattedResult);
   }
+  return formattedResults;
+}
 
 async function processSourceTexts() {
-    const sourceTexts = await loadSourceTexts();
-    
-    const formattedResults = [];
-    const processTextsStart = performance.now();
-    console.log("STARTING PROCESSING texts")
-    for (let i = 0; i < sourceTexts.length; i++) {
-      const input = sourceTexts[i];
-  
-      // Call the Local LLM for each source_text
-      console.log(input)
-      const promptStart = performance.now();
-      const processedResult = await callLocalLLM(input);
-      const promptEnd = performance.now();
-      const promptDiff = (promptStart - promptEnd) / 1000;
-      console.log(`Prompt ${i} processed in TIME =  ${promptDiff.toFixed(2)} seconds`)
-      console.log("--OUTPUT IS --")
-      console.log(processedResult)
-    //   console.log("--------------------------------------------------")
-      // Convert to the desired formatted result
-      const formattedResult = convertToFormattedResult(processedResult);
-  
-      // Push the formatted result to the array
-      formattedResults.push(formattedResult);
-    }
-    const processTextsEnd = performance.now();
-    const processDiff = (processTextsEnd - processTextsStart) / 1000;
-    console.log(`All Texts processing time ${processDiff.toFixed(2)} seconds`)
-  
-    // Save the results to 'generated_outputs.json'
-    fs.writeFileSync('generated_outputs.json', JSON.stringify(formattedResults, null, 2));
-    console.log('generated_outputs.json saved successfully.');
+  const sourceTexts = await loadSourceTexts();
+  const batchSize = 10;
+  let allResults = [];
+
+  if (fs.existsSync('predicted_labels.json')) {
+    allResults = JSON.parse(fs.readFileSync('predicted_labels.json', 'utf-8'));
   }
+
+  const processTextsStart = performance.now();
+  for (let start = 0; start < sourceTexts.length; start += batchSize) {
+    const end = Math.min(start + batchSize, sourceTexts.length);
+    const batch = sourceTexts.slice(start, end);
+    
+    // Process the batch and append results to the file
+    const batchResults = await processBatch(batch, start);
+    allResults.push(...batchResults);
+
+    // Save intermediate results to the file
+    fs.writeFileSync('predicted_labels.json', JSON.stringify(allResults, null, 2));
+    console.log(`Batch ${start} to ${end - 1} processed and saved successfully.`);
+  }
+
+  const processTextsEnd = performance.now();
+  const processDiff = (processTextsEnd - processTextsStart) / 1000;
+  console.log(`All Texts processing time ${processDiff.toFixed(2)} seconds`);
+}
+
+processSourceTexts().catch(err => console.error(err));
+
 
 async function callLocalLLM(input) {
     try {
