@@ -16,12 +16,12 @@
     },
     {
         "accuracy": 49.774173074936165,
-        "number_of_samples": 100,
+        "number_of_samples": 43501,
         "model_name": "Isotonic/deberta-v3-base_finetuned_ai4privacy_v2"
     },
     {
-        "accuracy": 49.774173074936165,
-        "number_of_samples": 43501,
-        "model_name": "Isotonic/deberta-v3-base_finetuned_ai4privacy_v2"
+        "accuracy": 4.15335463258786,
+        "number_of_samples": 100,
+        "model_name": "gemma:2b"
     }
 ]

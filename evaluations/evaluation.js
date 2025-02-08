@@ -132,7 +132,7 @@ Note: Every piece of sensitive information MUST be converted to "key": "value" f
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        model: "llama3.2:latest",  // 或其他你已安装的模型
+                        model: "gemma:2b",  // 或其他你已安装的模型
                         prompt: `${prompt}\n${input}\n Converted Output:`, // test case: My username is Annie. My password is 659876
                         stream: false
                     })
