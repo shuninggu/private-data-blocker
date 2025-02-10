@@ -54,48 +54,97 @@ async function processBatch(batch, startIndex) {
   for (let i = 0; i < batch.length; i++) {
     const input = batch[i];
     // console.log(`Processing text at index ${startIndex + i}:`, input);
-
+    let processedResult = null;
     // const promptStart = performance.now();
-    const processedResult = await callLocalLLM(input);
+    // console.log(`Start Processed sentence = ${batch[i]}`);
+    // console.log(`Start number = ${startIndex + i}`);
+    // const processedResult = await callLocalLLM(input);
+    try {
+        processedResult = await callLocalLLM(input);
+        // console.log(`Finished Processed sentence = ${processedResult}`);
+      } catch (error) {
+        console.error(`Error processing sentence at index ${startIndex + i}:`, error);
+      }
+    // console.log(`Finished Processed sentence = ${batch+i}`);
     // const promptEnd = performance.now();
     // const promptDiff = (promptEnd - promptStart) / 1000;
     // console.log(`Prompt ${startIndex + i} processed in ${promptDiff.toFixed(2)} seconds`);
 
-    const formattedResult = convertToFormattedResult(processedResult);
-    formattedResults.push(formattedResult);
+    // const formattedResult = convertToFormattedResult(processedResult);
+    // formattedResults.push(formattedResult);
+
+    if (processedResult) {
+        try {
+          const formattedResult = convertToFormattedResult(processedResult);
+          formattedResults.push(formattedResult);
+        } catch (error) {
+          console.error(`Error formatting result for index ${startIndex + i}:`, error);
+          formattedResults.push(null);
+        }
+      } else {
+        formattedResults.push(null);
+      }
   }
   return formattedResults;
 }
 
-async function processSourceTexts() {
-  const sourceTexts = await loadSourceTexts();
-  const batchSize = 10;
-  let allResults = [];
+// async function processSourceTexts() {
+//   const sourceTexts = await loadSourceTexts();
+//   const batchSize = 10;
+//   let allResults = [];
 
-  if (fs.existsSync('predicted_labels.json')) {
-    allResults = JSON.parse(fs.readFileSync('predicted_labels.json', 'utf-8'));
-  }
+//   if (fs.existsSync('predicted_labels.json')) {
+//     allResults = JSON.parse(fs.readFileSync('predicted_labels.json', 'utf-8'));
+//   }
 
-  const processTextsStart = performance.now();
-  for (let start = 0; start < sourceTexts.length; start += batchSize) {
-    const end = Math.min(start + batchSize, sourceTexts.length);
-    const batch = sourceTexts.slice(start, end);
+//   const processTextsStart = performance.now();
+//   for (let start = 0; start < sourceTexts.length; start += batchSize) {
+//     const end = Math.min(start + batchSize, sourceTexts.length);
+//     const batch = sourceTexts.slice(start, end);
     
-    // Process the batch and append results to the file
-    const batchResults = await processBatch(batch, start);
-    allResults.push(...batchResults);
+//     // Process the batch and append results to the file
+//     const batchResults = await processBatch(batch, start);
+//     allResults.push(...batchResults);
 
-    // Save intermediate results to the file
-    fs.writeFileSync('predicted_labels.json', JSON.stringify(allResults, null, 2));
-    console.log(`Batch ${start} to ${end - 1} processed and saved successfully.`);
+//     // Save intermediate results to the file
+//     fs.writeFileSync('predicted_labels.json', JSON.stringify(allResults, null, 2));
+//     console.log(`Batch ${start} to ${end - 1} processed and saved successfully.`);
+//   }
+
+//   const processTextsEnd = performance.now();
+//   const processDiff = (processTextsEnd - processTextsStart) / 1000;
+//   console.log(`All Texts processing time ${processDiff.toFixed(2)} seconds`);
+// }
+
+async function processSourceTexts() {
+    console.log("processSourceTexts() called")
+    const sourceTexts = await loadSourceTexts();
+    const batchSize = 10;
+    let allResults = []; // Start with an empty results array
+  
+    const processTextsStart = performance.now();
+    for (let start = 0; start < sourceTexts.length; start += batchSize) {
+      const end = Math.min(start + batchSize, sourceTexts.length);
+      const batch = sourceTexts.slice(start, end);
+  
+      // Process the batch and append results to the file
+      const batchResults = await processBatch(batch, start);
+      allResults.push(...batchResults);
+
+      fs.writeFileSync('predicted_labels_500_qwen_model.json', JSON.stringify(allResults, null, 2));
+      console.log(`Batch ${start} to ${end - 1} processed and saved successfully.`);
+    }
+  
+    // Save the final results to the file by overwriting it
+    // fs.writeFileSync('predicted_labels.json', JSON.stringify(allResults, null, 2));
+    console.log('All results processed and saved successfully.');
+  
+    const processTextsEnd = performance.now();
+    const processDiff = (processTextsEnd - processTextsStart) / 1000;
+    console.log(`All Texts processing time ${processDiff.toFixed(2)} seconds`);
   }
 
-  const processTextsEnd = performance.now();
-  const processDiff = (processTextsEnd - processTextsStart) / 1000;
-  console.log(`All Texts processing time ${processDiff.toFixed(2)} seconds`);
-}
-
-processSourceTexts().catch(err => console.error(err));
+// processSourceTexts().catch(err => console.error(err));
 
 
 async function callLocalLLM(input) {
@@ -118,7 +167,7 @@ youcan select the name of key from the following list:[
             'spouse', 'family', 'relative', 'parent', 'child',    // Family information
             'database', 'pin', 'code', 'key', 'token', 'secret'    // Security related
         ];
-Here's an Example:
+Follow this Example for the next Input sentence:
 Input: 'Please write a greeting card for Nancy when she is 18 years old and lives in Boston.'
 Output: 'Please write a greeting card for "name": "Nancy" when she is "age": "18" years old and lives in "city": "Boston".'
 
@@ -132,7 +181,7 @@ Note: Every piece of sensitive information MUST be converted to "key": "value" f
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        model: "gemma:2b",  // 或其他你已安装的模型
+                        model: "qwen2.5:3b",  // 或其他你已安装的模型
                         prompt: `${prompt}\n${input}\n Converted Output:`, // test case: My username is Annie. My password is 659876
                         stream: false
                     })
@@ -185,6 +234,7 @@ Note: Every piece of sensitive information MUST be converted to "key": "value" f
         // console.log(formattedResult)
 
         processSourceTexts().catch(console.error);
+        console.log("getting text - so this is printed  ")
 
         
             

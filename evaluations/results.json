@@ -23,5 +23,35 @@
         "accuracy": 4.15335463258786,
         "number_of_samples": 100,
         "model_name": "gemma:2b"
+    },
+    {
+        "accuracy": 38.33865814696485,
+        "number_of_samples": 100,
+        "model_name": "qwen2.5:3b"
+    },
+    {
+        "accuracy": 31.629392971246006,
+        "number_of_samples": 100,
+        "model_name": "llama3.2:latest"
+    },
+    {
+        "accuracy": 38.019169329073485,
+        "number_of_samples": 100,
+        "model_name": "updated-llama3.2:latest"
+    },
+    {
+        "accuracy": 22.683706070287542,
+        "number_of_samples": 100,
+        "model_name": "deepseek-r1:1.5b"
+    },
+    {
+        "accuracy": 84.05985686402082,
+        "number_of_samples": 500,
+        "model_name": "updated-llama3.2:latest"
+    },
+    {
+        "accuracy": 71.43786597267405,
+        "number_of_samples": 500,
+        "model_name": "qwen2.5:3b"
     }
 ]
