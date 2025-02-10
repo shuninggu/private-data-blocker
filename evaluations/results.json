@@ -53,5 +53,15 @@
         "accuracy": 71.43786597267405,
         "number_of_samples": 500,
         "model_name": "qwen2.5:3b"
+    },
+    {
+        "accuracy": 71.43786597267405,
+        "number_of_samples": 100,
+        "model_name": "updated-llama3.2:latest"
+    },
+    {
+        "accuracy": 72.20447284345049,
+        "number_of_samples": 100,
+        "model_name": "qwen2.5:3b"
     }
 ]
