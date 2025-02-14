@@ -92,5 +92,40 @@
         "model_name": "llama_model_new:latest",
         "average_time_per_prompt": 24.06,
         "total_time": 240.63
+    },
+    {
+        "accuracy": 82.10862619808307,
+        "number_of_samples": 100,
+        "model_name": "llama_model_new:latest",
+        "average_time_per_prompt": 16.22,
+        "total_time": 1922.28
+    },
+    {
+        "accuracy": 84.05985686402082,
+        "number_of_samples": 500,
+        "model_name": "llama_model_new:latest",
+        "average_time_per_prompt": 13.59,
+        "total_time": 7995.29
+    },
+    {
+        "accuracy": 73.78009108653221,
+        "number_of_samples": 500,
+        "model_name": "qwen2.5:3b",
+        "average_time_per_prompt": 8.81,
+        "total_time": 4407.2
+    },
+    {
+        "accuracy": 72.52396166134186,
+        "number_of_samples": 100,
+        "model_name": "qwen2.5:3b",
+        "average_time_per_prompt": 9.28,
+        "total_time": 927.75
+    },
+    {
+        "accuracy": 86.20689655172413,
+        "number_of_samples": 10,
+        "model_name": "qwen2.5:3b",
+        "average_time_per_prompt": 9.63,
+        "total_time": 96.36
     }
 ]

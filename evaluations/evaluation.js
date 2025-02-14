@@ -193,7 +193,7 @@ Note: Every piece of sensitive information MUST be converted to "key": "value" f
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        model: "llama_model_new:latest",  // 或其他你已安装的模型
+                        model: "qwen2.5:3b",  // 或其他你已安装的模型
                         prompt: `${prompt}\n${input}\n Converted Output:`, // test case: My username is Annie. My password is 659876
                         stream: false
                     })
