@@ -51,32 +51,29 @@ async function loadSourceTexts() {
 
 async function processBatch(batch, startIndex) {
   const formattedResults = [];
+  let sum =0
+
   for (let i = 0; i < batch.length; i++) {
     const input = batch[i];
-    // console.log(`Processing text at index ${startIndex + i}:`, input);
     let processedResult = null;
-    // const promptStart = performance.now();
-    // console.log(`Start Processed sentence = ${batch[i]}`);
-    // console.log(`Start number = ${startIndex + i}`);
-    // const processedResult = await callLocalLLM(input);
+    const promptStart = performance.now();
+    let promptDiff =0
+   
     try {
         processedResult = await callLocalLLM(input);
-        // console.log(`Finished Processed sentence = ${processedResult}`);
+        const promptEnd = performance.now();
+        promptDiff = (promptEnd - promptStart) / 1000;
+        // promptDiff = promptDiff.toFixed(2)
+        console.log(`Prompt ${i} processing time ${promptDiff} seconds`);
+        sum = sum + promptDiff
       } catch (error) {
         console.error(`Error processing sentence at index ${startIndex + i}:`, error);
       }
-    // console.log(`Finished Processed sentence = ${batch+i}`);
-    // const promptEnd = performance.now();
-    // const promptDiff = (promptEnd - promptStart) / 1000;
-    // console.log(`Prompt ${startIndex + i} processed in ${promptDiff.toFixed(2)} seconds`);
-
-    // const formattedResult = convertToFormattedResult(processedResult);
-    // formattedResults.push(formattedResult);
 
     if (processedResult) {
         try {
           const formattedResult = convertToFormattedResult(processedResult);
-          formattedResults.push(formattedResult);
+          formattedResults.push(formattedResult)
         } catch (error) {
           console.error(`Error formatting result for index ${startIndex + i}:`, error);
           formattedResults.push(null);
@@ -85,7 +82,8 @@ async function processBatch(batch, startIndex) {
         formattedResults.push(null);
       }
   }
-  return formattedResults;
+  console.log(`Prompt processing time for batch = ${sum}`)
+  return {"batchResults":formattedResults, "time":sum}
 }
 
 // async function processSourceTexts() {
@@ -120,6 +118,9 @@ async function processSourceTexts() {
     console.log("processSourceTexts() called")
     const sourceTexts = await loadSourceTexts();
     const batchSize = 10;
+    const predicted_labels_file_name = "predicted_labels.json";
+    let averageTime = 0;
+    let runningSumTime =0;
     let allResults = []; // Start with an empty results array
   
     const processTextsStart = performance.now();
@@ -128,20 +129,31 @@ async function processSourceTexts() {
       const batch = sourceTexts.slice(start, end);
   
       // Process the batch and append results to the file
-      const batchResults = await processBatch(batch, start);
+      const {batchResults, time} = await processBatch(batch, start);
+      runningSumTime = runningSumTime + time;
       allResults.push(...batchResults);
-
-      fs.writeFileSync('predicted_labels_500_qwen_model.json', JSON.stringify(allResults, null, 2));
+      // runningSumTime = runningSumTime + timeSum;
+      fs.writeFileSync(predicted_labels_file_name, JSON.stringify(allResults, null, 2));
       console.log(`Batch ${start} to ${end - 1} processed and saved successfully.`);
     }
-  
-    // Save the final results to the file by overwriting it
-    // fs.writeFileSync('predicted_labels.json', JSON.stringify(allResults, null, 2));
-    console.log('All results processed and saved successfully.');
-  
+    averageTime = sourceTexts.length>0 ? runningSumTime/(sourceTexts.length) : 0;
+    console.log(`Average time ${averageTime}`)
     const processTextsEnd = performance.now();
     const processDiff = (processTextsEnd - processTextsStart) / 1000;
     console.log(`All Texts processing time ${processDiff.toFixed(2)} seconds`);
+
+    const finalData = JSON.parse(fs.readFileSync(predicted_labels_file_name, 'utf8'));
+    const updatedData = {
+        results: finalData, // Keep existing results
+        averageTimePerPromptSeconds: averageTime.toFixed(2),
+        processingTimeSeconds: processDiff.toFixed(2),
+    };
+
+    fs.writeFileSync(predicted_labels_file_name, JSON.stringify(updatedData, null, 2));
+
+    console.log('All results processed and saved successfully.');
+  
+    
   }
 
 // processSourceTexts().catch(err => console.error(err));
@@ -181,7 +193,7 @@ Note: Every piece of sensitive information MUST be converted to "key": "value" f
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        model: "qwen2.5:3b",  // 或其他你已安装的模型
+                        model: "llama_model_new:latest",  // 或其他你已安装的模型
                         prompt: `${prompt}\n${input}\n Converted Output:`, // test case: My username is Annie. My password is 659876
                         stream: false
                     })
@@ -191,7 +203,7 @@ Note: Every piece of sensitive information MUST be converted to "key": "value" f
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
         
-                const data = await response.json();
+                let data = await response.json();
                 return data.response;
             } catch (error) {
                 console.error('Error calling local LLM:', error);
