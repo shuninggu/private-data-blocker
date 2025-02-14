@@ -1,0 +1,16 @@
+{
+  "results": [
+    "{\n  \"IMEI\": \"06-184755-866851-3\",\n  \"curriculum\": \"Optimization\"\n}",
+    "{\n  \"name\": \"Omer\",\n  \"idcard\": \"78B5R2MVFAHJ48500\"\n}",
+    "{\n  \"name\": \"Kattie\",\n  \"age\": \"72\",\n  \"city\": \"Intersex\",\n  \"length\": \"158centimeters\"\n}",
+    "{\n  \"name\": \"Nancy\",\n  \"age\": \"18\",\n  \"city\": \"Boston\",\n  \"place\": \"16356\",\n  \"account\": \"5890724654311332\"\n}",
+    "{\n  \"age\": \"old\"\n}",
+    "{\n  \"name\": \"Nancy\",\n  \"age\": \"18\",\n  \"city\": \"Boston\",\n  \"date\": \"29/12/1957\",\n  \"security method\": \"IPv6 edaf:fd8f:e1e8:cfec:8bab:1afd:6aad:550c\"\n}",
+    "{\n  \"gender\": \"Trans male\",\n  \"username\": \"E5_N8G2xWM6D\",\n  \"key\": \"value\"\n}",
+    "{\n  \"latitude\": \"-71.6702\",\n  \"longitude\": \"-107.6572\",\n  \"browser\": \"Mozilla/5.0 (Macintosh; PPC Mac OS X 10.7.5; rv:12.5) Gecko/20100101 Firefox/12.5.9\"\n}",
+    "{\n  \"username\": \"Carleton\",\n  \"age\": \"new\",\n  \"city\": \"[-38.9302,113.5422]\",\n  \"place\": \"[latitude]: [longitude]\",\n  \"password\": \"yZqd7gHyZq91\"\n}",
+    "{\n  \"time\": \"10:18 PM\",\n  \"name\": \"Human Group Coordinator\",\n  \"place\": \"Cleveland\",\n  \"email\": \"Emilie_Beatty53@hotmail.com\",\n  \"account\": \"63652332\",\n  \"PIN\": \"8824\",\n  \"EYECOLOR\": \"Eye color: Brown\"\n}"
+  ],
+  "averageTimePerPromptSeconds": "24.06",
+  "processingTimeSeconds": "240.63"
+}
