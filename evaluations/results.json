@@ -127,5 +127,54 @@
         "model_name": "qwen2.5:3b",
         "average_time_per_prompt": 9.63,
         "total_time": 96.36
+    },
+    {
+        "accuracy": 89.65517241379311,
+        "number_of_samples": 10,
+        "model_name": "llama3.2:latest",
+        "average_time_per_prompt": 45.71,
+        "total_time": 457.35
+    },
+    {
+        "accuracy": 71.69811320754717,
+        "number_of_samples": 500,
+        "model_name": "llama3.2:latest",
+        "average_time_per_prompt": 13.03,
+        "total_time": 6517.92
+    },
+    {
+        "accuracy": 73.48242811501598,
+        "number_of_samples": 100,
+        "model_name": "llama3.2:latest",
+        "average_time_per_prompt": 21.67,
+        "total_time": 2167.19
+    },
+    {
+        "accuracy": 97.78379654912843,
+        "number_of_samples": 43501,
+        "model_name": "Isotonic/mdeberta-v3-base_finetuned_ai4privacy_v2",
+        "average_time_per_prompt": 0,
+        "total_time": 0
+    },
+    {
+        "accuracy": 96.55172413793103,
+        "number_of_samples": 10,
+        "model_name": "Isotonic/mdeberta-v3-base_finetuned_ai4privacy_v2",
+        "average_time_per_prompt": 1.403304100036621,
+        "total_time": 14.033041000366211
+    },
+    {
+        "accuracy": 82.42811501597444,
+        "number_of_samples": 100,
+        "model_name": "Isotonic/mdeberta-v3-base_finetuned_ai4privacy_v2",
+        "average_time_per_prompt": 1.3769240379333496,
+        "total_time": 137.69240379333496
+    },
+    {
+        "accuracy": 84.38516590761223,
+        "number_of_samples": 500,
+        "model_name": "Isotonic/mdeberta-v3-base_finetuned_ai4privacy_v2",
+        "average_time_per_prompt": 1.2668695707321167,
+        "total_time": 633.4347853660583
     }
 ]
