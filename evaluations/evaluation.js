@@ -158,58 +158,60 @@ async function processSourceTexts() {
 
 // processSourceTexts().catch(err => console.error(err));
 
-
 async function callLocalLLM(input) {
-    try {
+  try {
 
-const prompt = `In the following sentence, please convert all mentions of specific names, places, ages, and numbers into a format that represents the type of information they belong to.
-Format requirements:
-1. Always use double quotes for both keys and values: "key": "value"
-2. Keep the rest of the sentence unchanged
-3. Place the key-value pair exactly where the original information appears
-
-youcan select the name of key from the following list:[
-            'name', 'firstname', 'lastname', 'nickname', 'username', 'password', 'email', 'phone', 'mobile', 'age', 'gender', 'birthday', 'birthdate',    // Basic personal information
-            'place', 'address', 'street', 'city', 'state', 'country', 'zipcode', 'postcode',    // Address related
-            'passport', 'license', 'ssn', 'id', 'idcard','insurance',    // Identity documents
-            'account', 'card', 'credit', 'debit', 'bank', 'salary', 'income', 'balance',    // Financial information
-            'facebook', 'twitter', 'instagram', 'linkedin', 'wechat', 'whatsapp',    // Social media
-            'school', 'company', 'occupation', 'position', 'title', 'department',    // Other personal information
-            'health', 'insurance', 'medication', 'diagnosis',    // Medical and health
-            'spouse', 'family', 'relative', 'parent', 'child',    // Family information
-            'database', 'pin', 'code', 'key', 'token', 'secret'    // Security related
-        ];
-Follow this Example for the next Input sentence:
-Input: 'Please write a greeting card for Nancy when she is 18 years old and lives in Boston.'
-Output: 'Please write a greeting card for "name": "Nancy" when she is "age": "18" years old and lives in "city": "Boston".'
-
-Note: Every piece of sensitive information MUST be converted to "key": "value" format with double quotes.
-
- `;
+      const prompt = `In the following sentence, please convert all mentions of specific names, places, ages, and numbers into a format that represents the type of information they belong to.
+      Format requirements:
+      1. Always use double quotes for both keys and values: "key": "value"
+      2. Keep the rest of the sentence unchanged
+      3. Place the key-value pair exactly where the original information appears
+      
+      youcan select the name of key from the following list:[
+                  'name', 'firstname', 'lastname', 'nickname', 'username', 'password', 'email', 'phone', 'mobile', 'age', 'gender', 'birthday', 'birthdate',
+                  'place', 'address', 'street', 'city', 'state', 'country', 'zipcode', 'postcode',
+                  'passport', 'license', 'ssn', 'id', 'idcard','insurance',
+                  'account', 'card', 'credit', 'debit', 'bank', 'salary', 'income', 'balance',
+                  'facebook', 'twitter', 'instagram', 'linkedin', 'wechat', 'whatsapp',
+                  'school', 'company', 'occupation', 'position', 'title', 'department',
+                  'health', 'insurance', 'medication', 'diagnosis', 
+                  'spouse', 'family', 'relative', 'parent', 'child', 
+                  'database', 'pin', 'code', 'key', 'token', 'secret'
+              ];
+      Here's an Example:
+      Input: 'My username is Annie. My password is 659876.'
+      Output: 'My "username": "Annie". My "password": "659876".'
+      
+      Note: Every piece of sensitive information MUST be converted to "key": "value" format with double quotes.
+      But do not take specific details from the example into account.
+      Don’t output your reasoning process.
+      Here's the input:`;
 //  Do not use the example sentence which is provided and do not make changes or additional format to the input text.
-                const response = await fetch('http://localhost:11434/api/generate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        model: "qwen2.5:3b",  // 或其他你已安装的模型
-                        prompt: `${prompt}\n${input}\n Converted Output:`, // test case: My username is Annie. My password is 659876
-                        stream: false
-                    })
-                });
-        
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-        
-                let data = await response.json();
-                return data.response;
-            } catch (error) {
-                console.error('Error calling local LLM:', error);
-                throw error;
-            }
-        }
+              const response = await fetch('http://localhost:11434/api/generate', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                      model: "llama3.2:3b", 
+                      prompt: `${prompt}\n${input}\n Converted Output:`, // test case: My username is Annie. My password is 659876
+                      stream: false
+                  })
+              });
+      
+              if (!response.ok) {
+                  throw new Error(`HTTP error! status: ${response.status}`);
+              }
+      
+              let data = await response.json();
+              return data.response;
+          } catch (error) {
+              console.error('Error calling local LLM:', error);
+              throw error;
+          }
+      }
+
+
 
         function convertToFormattedResult(processedResult) {
             try {

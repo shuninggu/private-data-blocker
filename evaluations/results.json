@@ -176,5 +176,12 @@
         "model_name": "Isotonic/mdeberta-v3-base_finetuned_ai4privacy_v2",
         "average_time_per_prompt": 1.2668695707321167,
         "total_time": 633.4347853660583
+    },
+    {
+        "accuracy": 79.3103448275862,
+        "number_of_samples": 10,
+        "model_name": "llama3.2:latest",
+        "average_time_per_prompt": 5.52,
+        "total_time": 55.23
     }
 ]
