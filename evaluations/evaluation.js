@@ -44,12 +44,12 @@ import fs from 'fs';
 
 // const { performance } = require('perf_hooks');
 
-async function loadSourceTexts() {
-  const data = fs.readFileSync('source_texts.json', 'utf-8'); // Read the file synchronously
+async function loadSourceTexts(source_file_name) {
+  const data = fs.readFileSync(source_file_name, 'utf-8'); // Read the file synchronously
   return JSON.parse(data); // Parse the JSON data
 }
 
-async function processBatch(batch, startIndex) {
+async function processBatch(batch, startIndex, model_name) {
   const formattedResults = [];
   let sum =0
 
@@ -60,7 +60,7 @@ async function processBatch(batch, startIndex) {
     let promptDiff =0
    
     try {
-        processedResult = await callLocalLLM(input);
+        processedResult = await callLocalLLM(input, model_name);
         const promptEnd = performance.now();
         promptDiff = (promptEnd - promptStart) / 1000;
         // promptDiff = promptDiff.toFixed(2)
@@ -114,11 +114,11 @@ async function processBatch(batch, startIndex) {
 //   console.log(`All Texts processing time ${processDiff.toFixed(2)} seconds`);
 // }
 
-async function processSourceTexts() {
+async function processSourceTexts(model_name, source_file_name, predicted_file_name) {
     console.log("processSourceTexts() called")
-    const sourceTexts = await loadSourceTexts();
+    const sourceTexts = await loadSourceTexts(source_file_name);
     const batchSize = 10;
-    const predicted_labels_file_name = "predicted_labels.json";
+    const predicted_labels_file_name = predicted_file_name;
     let averageTime = 0;
     let runningSumTime =0;
     let allResults = []; // Start with an empty results array
@@ -129,7 +129,7 @@ async function processSourceTexts() {
       const batch = sourceTexts.slice(start, end);
   
       // Process the batch and append results to the file
-      const {batchResults, time} = await processBatch(batch, start);
+      const {batchResults, time} = await processBatch(batch, start, model_name);
       runningSumTime = runningSumTime + time;
       allResults.push(...batchResults);
       // runningSumTime = runningSumTime + timeSum;
@@ -158,7 +158,7 @@ async function processSourceTexts() {
 
 // processSourceTexts().catch(err => console.error(err));
 
-async function callLocalLLM(input) {
+async function callLocalLLM(input, model_name) {
   try {
 
       const prompt = `In the following sentence, please convert all mentions of specific names, places, ages, and numbers into a format that represents the type of information they belong to.
@@ -193,7 +193,7 @@ async function callLocalLLM(input) {
                       'Content-Type': 'application/json',
                   },
                   body: JSON.stringify({
-                      model: "llama3.2:3b", 
+                      model:model_name, 
                       prompt: `${prompt}\n${input}\n Converted Output:`, // test case: My username is Annie. My password is 659876
                       stream: false
                   })
@@ -246,8 +246,11 @@ async function callLocalLLM(input) {
         // //get the json format 
         // const formattedResult = convertToFormattedResult(processedResult);
         // console.log(formattedResult)
-
-        processSourceTexts().catch(console.error);
+        
+        const model_name = process.argv[2];
+        const source_file_name = process.argv[3];
+        const predicted_file_name = process.argv[4];
+        processSourceTexts(model_name, source_file_name, predicted_file_name).catch(console.error);
         console.log("getting text - so this is printed  ")
 
         
