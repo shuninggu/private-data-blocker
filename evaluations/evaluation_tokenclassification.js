@@ -113,3 +113,5 @@ async function callLocalLLM(input, model_name) {
           console.error("Error processing LLM:", error);
 
         }
+
+        // Run this file using this command - 'node evaluation_tokenclassification.json llama3.2:latest'
