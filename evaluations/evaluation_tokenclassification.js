@@ -1,5 +1,84 @@
 import fs from 'fs'; 
 
+async function loadSourceTexts(source_file_name) {
+  const data = fs.readFileSync(source_file_name, 'utf-8'); // Read the file synchronously
+  return JSON.parse(data); // Parse the JSON data
+}
+
+async function processBatch(batch, startIndex, model_name) {
+    const formattedResults = [];
+    let sum =0
+  
+    for (let i = 0; i < batch.length; i++) {
+      const input = batch[i];
+      let processedResult = null;
+    //   const promptStart = performance.now();
+      let promptDiff =0
+     
+      try {
+          processedResult = await callLocalLLM(input, model_name);
+        //   const promptEnd = performance.now();
+        //   promptDiff = (promptEnd - promptStart) / 1000;
+          // promptDiff = promptDiff.toFixed(2)
+          if(processedResult) {
+            let jsonResult = JSON.parse(processedResult); 
+            formattedResults.push(jsonResult);
+          }
+          
+        //   console.log(`Prompt ${i} processing time ${promptDiff} seconds`);
+        //   sum = sum + promptDiff
+        } catch (error) {
+          console.error(`Error processing sentence at index ${startIndex + i}:`, error);
+        }
+
+    }
+    // console.log(`Prompt processing time for batch = ${sum}`)
+    return formattedResults
+  }
+
+  async function processSourceTexts(model_name, source_file_name, predicted_file_name) {
+      console.log("processSourceTexts() called")
+      const sourceTexts = await loadSourceTexts(source_file_name);
+      const batchSize = 10;
+      const predicted_labels_file_name = predicted_file_name;
+    //   let averageTime = 0;
+    //   let runningSumTime =0;
+      let allResults = []; // Start with an empty results array
+    
+      const processTextsStart = performance.now();
+      for (let start = 0; start < sourceTexts.length; start += batchSize) {
+        const end = Math.min(start + batchSize, sourceTexts.length);
+        const batch = sourceTexts.slice(start, end);
+    
+        // Process the batch and append results to the file
+        const batchResults = await processBatch(batch, start, model_name);
+        // runningSumTime = runningSumTime + time;
+        allResults.push(...batchResults);
+        // runningSumTime = runningSumTime + timeSum;
+        fs.writeFileSync(predicted_labels_file_name, JSON.stringify(allResults, null, 2));
+        console.log(`Batch ${start} to ${end - 1} processed and saved successfully.`);
+      }
+    //   averageTime = sourceTexts.length>0 ? runningSumTime/(sourceTexts.length) : 0;
+    //   console.log(`Average time ${averageTime}`)
+    //   const processTextsEnd = performance.now();
+    //   const processDiff = (processTextsEnd - processTextsStart) / 1000;
+    //   console.log(`All Texts processing time ${processDiff.toFixed(2)} seconds`);
+  
+    //   const finalData = JSON.parse(fs.readFileSync(predicted_labels_file_name, 'utf8'));
+    //   const updatedData = {
+    //       results: finalData, // Keep existing results
+    //       averageTimePerPromptSeconds: averageTime.toFixed(2),
+    //       processingTimeSeconds: processDiff.toFixed(2),
+    //   };
+  
+    //   fs.writeFileSync(predicted_labels_file_name, JSON.stringify(updatedData, null, 2));
+  
+      console.log('All results processed and saved successfully.');
+    
+      
+    }
+  
+
 async function callLocalLLM(input, model_name) {
     try {
         const prompt_new = `Classify each word in the sentence based on whether it contains sensitive information.
@@ -7,8 +86,8 @@ async function callLocalLLM(input, model_name) {
   
                 [
             'name', 'firstname', 'lastname', 'nickname', 'username', 'password', 'email', 'phone', 'mobile', 'age', 'gender', 'birthday', 'birthdate',    // Basic personal information
-            'place', 'address', 'street', 'city', 'state', 'country', 'zipcode', 'postcode',    // Address related
-            'passport', 'license', 'ssn', 'id', 'idcard','insurance',    // Identity documents
+            'place', 'address', 'street', 'city', 'state',  'country', 'zipcode', 'postcode', 'latitude', 'longitude'   // Address related
+            'passport', 'license', 'ssn', 'id', 'idcard','insurance', 'businessname'   // Identity documents
             'account', 'card', 'credit', 'debit', 'bank', 'salary', 'income', 'balance',    // Financial information
             'facebook', 'twitter', 'instagram', 'linkedin', 'wechat', 'whatsapp',    // Social media
             'school', 'company', 'occupation', 'position', 'title', 'department',    // Other personal information
@@ -21,7 +100,7 @@ async function callLocalLLM(input, model_name) {
             Maintain the original sentence structure without adding or removing words.
             Return the output strictly in valid JSON format as shown below.
   
-            The input sentence will be provided after [INPUT]. Classify the words from that sentence.
+            The input sentence will be provided after [INPUT]. Classify the words from that sentence. Ensure you do not miss any word from the sentence followed by [INPUT].
   
             Example - 
             Input - Kattie's assessment was found on device bearing IMEI: 06-184755-866851-3.
@@ -96,22 +175,6 @@ async function callLocalLLM(input, model_name) {
         const predicted_file_name = process.argv[4];
 
 
-        try {
-         let resultsArray = []; // Initialize an array to store JSON responses
-          const input =  `Kattie could you please share your recomndations about vegetarian diet for 72 old Intersex person with 158centimeters?`
-          // const input = `Dear Omer, as per our records, your license 78B5R2MVFAHJ48500 is still registered in our records for access to the educational tools. Please feedback on it's operability.`
-          // const input = `A student's assessment was found on device bearing IMEI: 06-184755-866851-3. The document falls under the various topics discussed in our Optimization curriculum. Can you please collect it?`
-          let processedResult = await callLocalLLM(input, model_name);
-          console.log(`processed result = ${processedResult}`)
-          let jsonResult = JSON.parse(processedResult); 
-          resultsArray.push(jsonResult);
-          console.log(`json result `, jsonResult)
-          fs.writeFileSync('token_label_pairs.json', JSON.stringify(resultsArray, null, 2));
-
-          if (!processedResult) throw new Error("callLocalLLM returned undefined");
-        } catch (error) {
-          console.error("Error processing LLM:", error);
-
-        }
+        processSourceTexts(model_name, source_file_name, predicted_file_name).catch(console.error);
 
         // Run this file using this command - 'node evaluation_tokenclassification.json llama3.2:latest'
