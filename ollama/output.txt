@@ -1,0 +1,10 @@
+0          1                 [abc, ee exy, xx]              [abc, ee exy, xx]              1.00
+1          2                 [abc, ee exy, xx]              [abc, ee exy, xy]              0.83
+2          3                 [abc, ee exy, xx]                      [abc, ee]              0.50
+3          4                 [abc, ee exy, xx]                      [xyz, ee]              0.17
+4          5             [hello world, python]                [hello, python]              0.81
+5          6  [data science, machine learning]               [data, learning]              0.58
+6          7                 [one, two, three]                [one, 2, three]              0.67
+7          8           [apple, banana, cherry]         [orange, grape, peach]              0.30
+8          9            [same text, identical]  [same text, identical, extra]              0.67
+9         10                           [short]              [longer sentence]              0.20
